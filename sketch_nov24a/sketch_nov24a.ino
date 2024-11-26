@@ -1,6 +1,8 @@
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
+String inputSerial = "";
+
 const byte botaoQuarto = 2;
 const byte ledQuarto = 8;
 byte valorBotaoQuarto;
@@ -26,6 +28,9 @@ byte valorBotaoCozinhaAnterior;
 boolean ledCozinhaLigado = true;
 
 void setup() {
+
+  Serial.begin(9600);
+
   lcd.init();
   lcd.setBacklight(HIGH);
 
@@ -41,60 +46,108 @@ void setup() {
   pinMode(botaoCozinha, INPUT_PULLUP);
   pinMode(ledCozinha, OUTPUT);
 }
-
 void loop() {
-  // Verificar se o estado do botão foi alterado e fazer debounce
+
+  if (Serial.available() > 0) {
+    inputSerial = Serial.readString();
+    Serial.print("O QUE ESCREVERAM " + inputSerial);
+
+
+    if (inputSerial == "porta") {
+      digitalWrite(ledQuarto, HIGH);
+    } else if (inputSerial == "porta quebrada") {
+      digitalWrite(ledQuarto, LOW);
+    }
+
+     if (inputSerial == "pasta") {
+      digitalWrite(ledSala, HIGH);
+    } else if (inputSerial == "pasta de amendoim") {
+      digitalWrite(ledSala, LOW);
+    }
+
+     if (inputSerial == "lasanha") {
+      digitalWrite(ledCozinha, HIGH);
+    } else if (inputSerial == "lasanha queimada") {
+      digitalWrite(ledCozinha, LOW);
+    }
+
+     if (inputSerial == "frutas") {
+      digitalWrite(ledBanheiro, HIGH);
+    } else if (inputSerial == "frutas estragada") {
+      digitalWrite(ledBanheiro, LOW);
+    }
+  }
+
   valorBotaoQuarto = digitalRead(botaoQuarto);
   if (valorBotaoQuarto != valorBotaoQuartoAnterior) {
-    if (valorBotaoQuarto == LOW) { // Detecta pressionamento do botão
+    if (valorBotaoQuarto) {
       ledQuartoLigado = !ledQuartoLigado;
       digitalWrite(ledQuarto, ledQuartoLigado);
-      atualizarLCD(0, "Luz quarto", ledQuartoLigado);
     }
-    valorBotaoQuartoAnterior = valorBotaoQuarto;
-    delay(200); // Delay de debounce
   }
+  valorBotaoQuartoAnterior = valorBotaoQuarto;
+  delay(10);
 
   valorBotaoSala = digitalRead(botaoSala);
   if (valorBotaoSala != valorBotaoSalaAnterior) {
-    if (valorBotaoSala == LOW) {
+    if (valorBotaoSala) {
       ledSalaLigado = !ledSalaLigado;
       digitalWrite(ledSala, ledSalaLigado);
-      atualizarLCD(1, "Luz sala", ledSalaLigado);
     }
-    valorBotaoSalaAnterior = valorBotaoSala;
-    delay(200); // Delay de debounce
   }
+  valorBotaoSalaAnterior = valorBotaoSala;
+  delay(10);
 
   valorBotaoBanheiro = digitalRead(botaoBanheiro);
   if (valorBotaoBanheiro != valorBotaoBanheiroAnterior) {
-    if (valorBotaoBanheiro == LOW) {
+    if (valorBotaoBanheiro) {
       ledBanheiroLigado = !ledBanheiroLigado;
       digitalWrite(ledBanheiro, ledBanheiroLigado);
-      atualizarLCD(2, "Luz banheiro", ledBanheiroLigado);
     }
-    valorBotaoBanheiroAnterior = valorBotaoBanheiro;
-    delay(200); // Delay de debounce
   }
+  valorBotaoBanheiroAnterior = valorBotaoBanheiro;
+  delay(10);
 
   valorBotaoCozinha = digitalRead(botaoCozinha);
   if (valorBotaoCozinha != valorBotaoCozinhaAnterior) {
-    if (valorBotaoCozinha == LOW) {
+    if (valorBotaoCozinha) {
       ledCozinhaLigado = !ledCozinhaLigado;
       digitalWrite(ledCozinha, ledCozinhaLigado);
-      atualizarLCD(3, "Luz cozinha", ledCozinhaLigado);
     }
-    valorBotaoCozinhaAnterior = valorBotaoCozinha;
-    delay(200); // Delay de debounce
   }
-}
+  valorBotaoCozinhaAnterior = valorBotaoCozinha;
+  delay(10);
 
-// Função para atualizar o LCD com a mensagem de estado de cada luz
-void atualizarLCD(int linha, String ambiente, boolean estado) {
-  lcd.setCursor(0, linha);   // Volta para o início da linha
-  if (estado) {
-    lcd.print(ambiente + " acesa");
-  } else {
+
+  if (ledQuartoLigado == true) {
+    lcd.setCursor(0, 0);
+    lcd.print("Luz quarto acesa  ");
+  } else if (ledQuartoLigado == false) {
+    lcd.setCursor(0, 0);
+    lcd.print("                    ");
+  }
+
+  if (ledSalaLigado == true) {
+    lcd.setCursor(0, 1);
+    lcd.print("Luz sala acesa  ");
+  } else if (ledSalaLigado == false) {
+    lcd.setCursor(0, 1);
+    lcd.print("                    ");
+  }
+
+  if (ledBanheiroLigado == true) {
+    lcd.setCursor(0, 2);
+    lcd.print("Luz banheiro acesa  ");
+  } else if (ledBanheiroLigado == false) {
+    lcd.setCursor(0, 2);
+    lcd.print("                    ");
+  }
+
+  if (ledCozinhaLigado == true) {
+    lcd.setCursor(0, 3);
+    lcd.print("Luz cozinha acesa  ");
+  } else if (ledCozinhaLigado == false) {
+    lcd.setCursor(0, 3);
     lcd.print("                    ");
   }
 }
